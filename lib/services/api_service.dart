@@ -1,39 +1,50 @@
 import 'dart:convert';
+import 'dart:math';
+
 import 'package:http/http.dart' as http;
-import '../models/dog.dart';
+
+import '../models/fish.dart';
 
 class ApiService {
-  static Future<Dog> fetchRandomDog() async {
+  static Future<Fish> fetchRandomFish() async {
     final response = await http.get(
-      Uri.parse('https://dog.ceo/api/breeds/image/random'),
+      Uri.parse('https://www.fishwatch.gov/api/species'),
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to load dog');
+      throw Exception('Failed to load fish');
     }
 
-    final data = jsonDecode(response.body);
+    final List<dynamic> data = jsonDecode(response.body);
 
-    final imageUrl = data['message'];
+    if (data.isEmpty) {
+      throw Exception('No fish found');
+    }
 
-    final breed = _extractBreed(imageUrl);
+    final randomFish = data[Random().nextInt(data.length)];
 
-    return Dog(
-      breed: breed,
+    final name = randomFish['Species Name'] ?? 'Unknown Fish';
+
+    String imageUrl = '';
+
+    if (randomFish['Species Illustration Photo'] != null &&
+        randomFish['Species Illustration Photo']['src'] != null) {
+      imageUrl = randomFish['Species Illustration Photo']['src'];
+    } else if (randomFish['Image Gallery'] != null &&
+        randomFish['Image Gallery'] is List &&
+        randomFish['Image Gallery'].isNotEmpty &&
+        randomFish['Image Gallery'][0]['src'] != null) {
+      imageUrl = randomFish['Image Gallery'][0]['src'];
+    }
+
+    if (imageUrl.isEmpty) {
+      imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/No_image_available.svg/640px-No_image_available.svg.png';
+    }
+
+    return Fish(
+      name: name,
       imageUrl: imageUrl,
       savedAt: DateTime.now().toString(),
     );
-  }
-
-  static String _extractBreed(String imageUrl) {
-    final parts = imageUrl.split('/');
-
-    final breedIndex = parts.indexOf('breeds');
-
-    if (breedIndex != -1 && breedIndex + 1 < parts.length) {
-      return parts[breedIndex + 1].replaceAll('-', ' ');
-    }
-
-    return 'Unknown Breed';
   }
 }

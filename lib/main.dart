@@ -12,17 +12,17 @@ void main() {
     databaseFactory = databaseFactoryFfi;
   }
 
-  runApp(const DogBreedDiaryApp());
+  runApp(const FishExplorerApp());
 }
 
-class DogBreedDiaryApp extends StatefulWidget {
-  const DogBreedDiaryApp({super.key});
+class FishExplorerApp extends StatefulWidget {
+  const FishExplorerApp({super.key});
 
   @override
-  State<DogBreedDiaryApp> createState() => _DogBreedDiaryAppState();
+  State<FishExplorerApp> createState() => _FishExplorerAppState();
 }
 
-class _DogBreedDiaryAppState extends State<DogBreedDiaryApp> {
+class _FishExplorerAppState extends State<FishExplorerApp> {
   int currentIndex = 0;
   int favoritesRefreshKey = 0;
 
@@ -35,9 +35,9 @@ class _DogBreedDiaryAppState extends State<DogBreedDiaryApp> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Dog Breed Diary',
+      title: 'Fish Explorer',
       theme: ThemeData(
-        colorSchemeSeed: Colors.brown,
+        colorSchemeSeed: Colors.blue,
         useMaterial3: true,
       ),
       home: Scaffold(
@@ -55,7 +55,7 @@ class _DogBreedDiaryAppState extends State<DogBreedDiaryApp> {
           },
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.pets),
+              icon: Icon(Icons.set_meal),
               label: 'Browse',
             ),
             NavigationDestination(

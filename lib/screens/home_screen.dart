@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/dog.dart';
+import '../models/fish.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 
@@ -13,44 +13,44 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Dog? currentDog;
+  Fish? currentFish;
   bool isLoading = false;
   String? errorMessage;
-  String lastBreed = 'None yet';
+  String lastFish = 'None yet';
 
   @override
   void initState() {
     super.initState();
-    loadLastBreed();
+    loadLastFish();
   }
 
-  Future<void> loadLastBreed() async {
+  Future<void> loadLastFish() async {
     final prefs = await SharedPreferences.getInstance();
 
     setState(() {
-      lastBreed = prefs.getString('lastBreed') ?? 'None yet';
+      lastFish = prefs.getString('lastFish') ?? 'None yet';
     });
   }
 
-  Future<void> fetchDog() async {
+  Future<void> fetchFish() async {
     setState(() {
       isLoading = true;
       errorMessage = null;
     });
 
     try {
-      final dog = await ApiService.fetchRandomDog();
+      final fish = await ApiService.fetchRandomFish();
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('lastBreed', dog.breed);
+      await prefs.setString('lastFish', fish.name);
 
       setState(() {
-        currentDog = dog;
-        lastBreed = dog.breed;
+        currentFish = fish;
+        lastFish = fish.name;
       });
     } catch (e) {
       setState(() {
-        errorMessage = 'Could not load a dog. Check your internet and try again.';
+        errorMessage = 'Could not load a fish. Check your internet and try again.';
       });
     } finally {
       setState(() {
@@ -61,34 +61,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> simulateError() async {
     setState(() {
-      currentDog = null;
-      errorMessage = 'Simulated error: the dog API failed to load.';
+      currentFish = null;
+      errorMessage = 'Simulated error: the fish API failed to load.';
       isLoading = false;
     });
   }
 
-  Future<void> saveDog() async {
-    if (currentDog == null) return;
+  Future<void> saveFish() async {
+    if (currentFish == null) return;
 
-    await DatabaseService.insertDog(currentDog!);
+    await DatabaseService.insertFish(currentFish!);
 
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${currentDog!.breed} saved to favorites!'),
+        content: Text('${currentFish!.name} saved to favorites!'),
       ),
     );
-  }
-
-  String formatBreed(String breed) {
-    return breed
-        .split(' ')
-        .map((word) {
-          if (word.isEmpty) return word;
-          return word[0].toUpperCase() + word.substring(1);
-        })
-        .join(' ');
   }
 
   @override
@@ -101,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           CircularProgressIndicator(),
           SizedBox(height: 16),
-          Text('Fetching a random dog...'),
+          Text('Fetching a random fish...'),
         ],
       );
     } else if (errorMessage != null) {
@@ -117,65 +107,68 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: fetchDog,
+            onPressed: fetchFish,
             icon: const Icon(Icons.refresh),
             label: const Text('Retry'),
           ),
         ],
       );
-    } else if (currentDog == null) {
+    } else if (currentFish == null) {
       content = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.pets, size: 72),
+          const Icon(Icons.set_meal, size: 72),
           const SizedBox(height: 16),
           const Text(
-            'Welcome to Dog Breed Diary!',
+            'Welcome to Fish Explorer!',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Last viewed breed: ${formatBreed(lastBreed)}',
+            'Last viewed fish: $lastFish',
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           const Text(
-            'Press the button below to discover a random dog.',
+            'Press the button below to discover a random fish species.',
             textAlign: TextAlign.center,
           ),
         ],
       );
     } else {
-      content = Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            formatBreed(currentDog!.breed),
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.network(
-              currentDog!.imageUrl,
-              height: 400,
-              width: double.infinity,
-              fit: BoxFit.contain,
+      content = SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              currentFish!.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: saveDog,
-            icon: const Icon(Icons.favorite),
-            label: const Text('Save Favorite'),
-          ),
-        ],
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                currentFish!.imageUrl,
+                height: 400,
+                width: double.infinity,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: saveFish,
+              icon: const Icon(Icons.favorite),
+              label: const Text('Save Favorite'),
+            ),
+          ],
+        ),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dog Breed Diary'),
+        title: const Text('Fish Explorer'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -185,14 +178,14 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            heroTag: 'fetchDog',
-            onPressed: fetchDog,
-            icon: const Icon(Icons.pets),
-            label: const Text('Fetch Dog'),
+            heroTag: 'fetchFish',
+            onPressed: fetchFish,
+            icon: const Icon(Icons.set_meal),
+            label: const Text('Fetch Fish'),
           ),
           const SizedBox(height: 12),
           FloatingActionButton.extended(
-            heroTag: 'errorDog',
+            heroTag: 'errorFish',
             onPressed: simulateError,
             icon: const Icon(Icons.warning),
             label: const Text('Test Error'),

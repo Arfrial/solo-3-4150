@@ -1,12 +1,12 @@
-class Dog {
+class Fish {
   final int? id;
-  final String breed;
+  final String name;
   final String imageUrl;
   final String savedAt;
 
-  Dog({
+  Fish({
     this.id,
-    required this.breed,
+    required this.name,
     required this.imageUrl,
     required this.savedAt,
   });
@@ -14,16 +14,16 @@ class Dog {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'breed': breed,
+      'name': name,
       'imageUrl': imageUrl,
       'savedAt': savedAt,
     };
   }
 
-  factory Dog.fromMap(Map<String, dynamic> map) {
-    return Dog(
+  factory Fish.fromMap(Map<String, dynamic> map) {
+    return Fish(
       id: map['id'],
-      breed: map['breed'],
+      name: map['name'],
       imageUrl: map['imageUrl'],
       savedAt: map['savedAt'],
     );

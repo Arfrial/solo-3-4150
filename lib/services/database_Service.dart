@@ -1,6 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import '../models/dog.dart';
+
+import '../models/fish.dart';
 
 class DatabaseService {
   static Database? _database;
@@ -18,16 +19,16 @@ class DatabaseService {
   static Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
 
-    final path = join(dbPath, 'dogs.db');
+    final path = join(dbPath, 'fish.db');
 
     return await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) async {
         await db.execute('''
-          CREATE TABLE dogs(
+          CREATE TABLE fish(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            breed TEXT,
+            name TEXT,
             imageUrl TEXT,
             savedAt TEXT
           )
@@ -36,41 +37,41 @@ class DatabaseService {
     );
   }
 
-  static Future<void> insertDog(Dog dog) async {
+  static Future<void> insertFish(Fish fish) async {
     final db = await database;
 
     await db.insert(
-      'dogs',
-      dog.toMap(),
+      'fish',
+      fish.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  static Future<List<Dog>> getDogs() async {
+  static Future<List<Fish>> getFish() async {
     final db = await database;
 
     final List<Map<String, dynamic>> maps =
-        await db.query('dogs', orderBy: 'id DESC');
+        await db.query('fish', orderBy: 'id DESC');
 
     return List.generate(
       maps.length,
-      (i) => Dog.fromMap(maps[i]),
+      (i) => Fish.fromMap(maps[i]),
     );
   }
 
-  static Future<void> deleteDog(int id) async {
+  static Future<void> deleteFish(int id) async {
     final db = await database;
 
     await db.delete(
-      'dogs',
+      'fish',
       where: 'id = ?',
       whereArgs: [id],
     );
   }
 
-  static Future<void> clearAllDogs() async {
+  static Future<void> clearAllFish() async {
     final db = await database;
 
-    await db.delete('dogs');
+    await db.delete('fish');
   }
 }
